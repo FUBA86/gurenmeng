@@ -105,23 +105,25 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
 		<div id="init-loading"><div>Loading&hellip;</div></div>
 	</div>
 	<tw-storydata name="故人梦" startnode="25" creator="Twine" creator-version="2.10.0" format="SugarCube" format-version="2.37.3" ifid="67308316-BD77-403E-83D3-89E516D2A05E" options="" tags="" zoom="1" hidden><style role="stylesheet" id="twine-user-stylesheet" type="text/twine-css">/* =========================================
-   1. 颜色变量定义 (保持高对比度清晰版)
+   1. 颜色变量定义
    ========================================= */
 :root {
     /* --- 白天模式 (Light Mode) --- */
-    --main-bg: #fcf9f2;       /* 背景：米黄色宣纸 */
+    --main-bg: #fcf9f2;       /* 米黄宣纸背景 */
     --pattern-color: #ede8d5; /* 底纹颜色 */
-    --box-bg: rgba(255, 255, 255, 0.93); /* 文字框：不透明度调高，背景更白净 */
+    --box-bg: rgba(255, 255, 255, 0.93); 
     
-    /* 字体颜色：深灰/黑，保证阅读舒适 */
-    --text-color: #333333;    
-    --sidebar-text: #555555;  /* 侧边栏文字 */
+    /* 核心修复：定义侧边栏按钮的深色 */
+    --sidebar-btn: #4e342e;   /* 深檀木色（按钮常态） */
+    --sidebar-btn-hover: #b83b1a; /* 朱砂红（鼠标悬停） */
     
-    --sidebar-bg: #f2efe6;    /* 侧边栏背景 */
-    --border-color: #8c7e72;  /* 边框：深檀木色 */
-    --link-color: #b83b1a;    /* 选项：朱砂红 */
-    --link-hover: #e65133;    /* 悬停：亮红 */
-    --progress-bg: #dcd6cb;   /* 进度条底色 */
+    --text-color: #333333;    /* 正文深灰 */
+    --link-color: #b83b1a;    /* 选项链接红 */
+    --link-hover: #e65133;    
+    
+    --sidebar-bg: #f2efe6;    /* 侧边栏浅底 */
+    --border-color: #8c7e72;  /* 边框色 */
+    --progress-bg: #dcd6cb;
 }
 
 /* --- 深色模式 (Dark Mode) --- */
@@ -131,31 +133,31 @@ var LZString=function(){var r=String.fromCharCode,o="ABCDEFGHIJKLMNOPQRSTUVWXYZa
         --pattern-color: #242424;
         --box-bg: rgba(30, 30, 30, 0.95);
         
-        --text-color: #d1d1d1;    /* 银白 */
-        --sidebar-text: #aaaaaa;  /* 侧边栏文字 */
+        /* 深色模式下，按钮要变回浅色才能看清 */
+        --sidebar-btn: #aaaaaa; 
+        --sidebar-btn-hover: #ffffff;
+        
+        --text-color: #d1d1d1;
+        --link-color: #76c7c0;
+        --link-hover: #a3e4de;
         
         --sidebar-bg: #111111;
         --border-color: #555;
-        --link-color: #76c7c0;    /* 青玉色 */
-        --link-hover: #a3e4de;
         --progress-bg: #333;
     }
 }
 
 /* =========================================
-   2. 全局样式 (字体已改回默认)
+   2. 全局基础样式
    ========================================= */
-
 body {
     background-color: var(--main-bg);
     color: var(--text-color);
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif; /* 清晰黑体 */
+    font-size: 110%;
+    line-height: 1.8;
     
-    /* 【修改处】改回了易读的现代黑体/系统默认字体 */
-    font-family: "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
-    font-size: 110%; /* 字号依然保持稍大 */
-    line-height: 1.8; /* 行间距宽松，适合阅读小说 */
-    
-    /* 保持中式窗棂/回纹底纹 */
+    /* 中式回纹背景 */
     background-image: 
         linear-gradient(45deg, var(--pattern-color) 25%, transparent 25%, transparent 75%, var(--pattern-color) 75%, var(--pattern-color)),
         linear-gradient(45deg, var(--pattern-color) 25%, transparent 25%, transparent 75%, var(--pattern-color) 75%, var(--pattern-color));
@@ -163,52 +165,68 @@ body {
     background-position: 0 0, 20px 20px;
 }
 
-/* --- 修复侧边栏 (UI Bar) 看不清的问题 --- */
+/* =========================================
+   3. 侧边栏 (UI Bar) 深度修复
+   ========================================= */
 #ui-bar {
     background-color: var(--sidebar-bg);
     border-right: 2px solid var(--border-color);
-    color: var(--sidebar-text) !important; 
+    /* 强制侧边栏普通文字颜色 */
+    color: var(--sidebar-btn) !important; 
 }
 
-/* 修复侧边栏里的链接（Save, Restart等） */
+/* 修复1：存档、重启等文字按钮 */
 #ui-bar a {
-    color: var(--link-color) !important;
+    color: var(--sidebar-btn) !important; /* 强制深色 */
+    font-weight: bold;
+    opacity: 1 !important; /* 去掉半透明 */
+    transition: color 0.3s;
 }
 #ui-bar a:hover {
-    color: var(--link-hover) !important;
+    color: var(--sidebar-btn-hover) !important; /* 悬停变红 */
+    text-decoration: none;
 }
 
-/* 修复故事标题和作者 */
-#story-title, #story-author {
+/* 修复2：前进/后退箭头 (History) */
+#ui-bar-history [id|="history"] {
+    color: var(--sidebar-btn) !important;
+    opacity: 1 !important; /* 这一点很重要，默认是模糊的，改实心 */
+}
+#ui-bar-history [id|="history"]:hover {
+    color: var(--sidebar-btn-hover) !important;
+}
+
+/* 修复3：手机端折叠按钮 (Hamburger Menu) */
+#ui-bar-toggle {
+    color: var(--sidebar-btn) !important;
+    background: transparent;
+}
+
+/* 修复4：标题和作者 */
+#story-title {
     color: var(--text-color) !important;
+    font-weight: bold;
     text-shadow: none; 
 }
-
-/* 修复历史记录按钮 */
-#ui-bar-history [id|="history"] {
-    color: var(--sidebar-text) !important;
-    opacity: 0.8;
+#story-author {
+    color: var(--sidebar-btn) !important;
+    font-size: 90%;
 }
 
 /* =========================================
-   3. 故事框 (书页效果)
+   4. 故事框与组件
    ========================================= */
 #passages {
     max-width: 760px;
     margin: 40px auto;
     padding: 3em;
-    
-    background-color: var(--box-bg); /* 文字背景 */
-    border: 2px solid var(--border-color); /* 实线外框 */
-    
-    /* 双重边框：外实内虚，增加精致感 */
+    background-color: var(--box-bg);
+    border: 2px solid var(--border-color);
     outline: 5px double var(--border-color);
     outline-offset: -12px;
-    
-    box-shadow: 0 5px 15px rgba(0,0,0,0.1); /* 阴影 */
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-/* 选项链接 */
 a {
     color: var(--link-color);
     font-weight: bold;
@@ -218,28 +236,29 @@ a {
 }
 a:hover {
     color: var(--link-hover);
-    background-color: rgba(0,0,0,0.05); /* 悬停时淡淡的背景色 */
+    background-color: rgba(0,0,0,0.05);
     border-bottom: 1px solid var(--link-hover);
 }
 
+.progress-container {
+    background-color: var(--progress-bg);
+    border: 1px solid var(--border-color);
+    height: 8px;
+}
 
 /* =========================================
-   4. 手机适配 (响应式)
+   5. 手机适配
    ========================================= */
 @media screen and (max-width: 768px) {
     #passages {
         margin: 0;
         width: 100%;
         max-width: 100%;
-        padding: 1.5em 1em; /* 手机上边距改小 */
+        padding: 1.5em 1em;
         border: none;
-        outline: none; /* 手机上去掉复杂的框，更清爽 */
-        box-shadow: none;
-        background-color: var(--main-bg); /* 手机上直接用底色，去掉方块感 */
+        outline: none;
+        background-color: var(--main-bg);
     }
-    
-    /* 手机上隐藏复杂的底纹，让阅读更纯粹 (可选) */
-    /* 如果你想手机上也显示底纹，就把下面这行删掉 */
     body { background-image: none; } 
 }</style><script role="script" id="twine-user-script" type="text/twine-javascript"></script><tw-passagedata pid="1" name="Start" tags="" position="800,325" size="100,100">萧逸才在一棵树下找到了昏迷的青龙。
 昔日道术高强、冷厉孤傲的魔教圣使软软地倚在树干上，了无声息，高挑的身子跌坐下来，看起来也是一样的虚弱。嘴唇被血染得嫣红，血丝顺着嘴角滴下，衬得原本就白皙的皮肤更是苍白。他低垂着头，双目紧闭，再看不到那双冰凉冷漠的眼神，显得眉眼也柔和下来，精致的眉骨、秀挺的鼻梁，五官竟然还有一丝稚气。往常慑于他的威势不敢抬头看，只在心中愤愤，直到这时萧逸才忽然发现，这青龙圣使倒是生得一副好相貌。
@@ -720,7 +739,7 @@ a:hover {
         &lt;strong&gt;【高亮预警 (请务必确认)】&lt;/strong&gt;&lt;br&gt;
         本作包含以下可能引起不适的元素，请无法接受的读者&lt;b&gt;立即退出&lt;/b&gt;：&lt;br&gt;
         &lt;br&gt;
-        • &lt;b&gt;ABO设定 / 男生子 (Mpreg)&lt;/b&gt;&lt;br&gt;
+        • &lt;b&gt; 男生子 (Mpreg)&lt;/b&gt;&lt;br&gt;
         • &lt;b&gt;非自愿性行为 / 强制爱 (Non-con/Dub-con)&lt;/b&gt;&lt;br&gt;
         • &lt;b&gt;角色黑化 / 监禁 / 精神控制&lt;/b&gt;&lt;br&gt;
         • 角色死亡结局 (BE) 
